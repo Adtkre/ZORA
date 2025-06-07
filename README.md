@@ -30,6 +30,12 @@ Just say **“Zora”** to wake it up – it listens, responds with ChatGPT inte
 - `pyttsx3` – to speak back
 - `pyautogui` – to type what you say
 - `OpenAI` – for AI responses
+  
 
 ---
 This project is licensed under the MIT License – see the LICENSE file for details.
+---
+Add your OpenAI API key
+Open the .py file and find:
+api_key = "your-openai-api-key"
+Replace with your own key.
