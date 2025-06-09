@@ -88,7 +88,13 @@ def processCommand(c):
     elif "shutdown" in c:
         speak("Shutting down your computer.")
         os.system("shutdown /s /t 1")
-
+    elif "sleep" in c:
+     speak("Putting your computer to sleep.")
+     os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
+         
+    elif "lock" in c:
+        speak("Locking your computer.")
+        os.system("rundll32.exe user32.dll,LockWorkStation")
     elif "restart" in c:
         speak("Restarting your computer.")
         os.system("shutdown /r /t 1")
