@@ -36,7 +36,7 @@ root.bind("<Button-1>", start_move)
 root.bind("<B1-Motion>", do_move)
 
 # Label
-status_label = tk.Label(root, text="🎧 Zora is running...", fg="white", bg="#ebc8e1", font=("Segoe UI", 11))
+status_label = tk.Label(root, text="🎧 ZORA is running...", fg="white", bg="#ebc8e1", font=("Segoe UI", 11))
 status_label.pack(expand=True)
 
 def speak(text):
@@ -76,12 +76,15 @@ def processCommand(c):
     c = c.lower()
 
     if "open google" in c:
+        speak("Opening Google")
         webbrowser.open("https://google.com")
 
     elif "open youtube" in c:
+        speak("Opening Youtube")
         webbrowser.open("https://youtube.com")
 
     elif "open netflix" in c:
+        speak("Opening Netflix")
         webbrowser.open("https://netflix.com")
 
     # OS Commands
@@ -91,10 +94,11 @@ def processCommand(c):
     elif "sleep" in c:
      speak("Putting your computer to sleep.")
      os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
-         
-    elif "lock" in c:
+    elif "lock screen" in c:
         speak("Locking your computer.")
         os.system("rundll32.exe user32.dll,LockWorkStation")
+
+
     elif "restart" in c:
         speak("Restarting your computer.")
         os.system("shutdown /r /t 1")
@@ -130,6 +134,7 @@ def processCommand(c):
         speak("Opening File Explorer")
         subprocess.Popen("explorer.exe")
 
+
     elif "open code editor" in c:
         vscode_path = "C:\\Users\\DELL\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Visual Studio Code\\Visual Studio Code.lnk"
         if os.path.exists(vscode_path):
@@ -157,7 +162,7 @@ def processCommand(c):
 
 
 def assistant_loop():
-    speak("Starting Zora...")
+    speak("Starting ZORA...")
     while True:
         print("Recognizing...")
         try:
@@ -172,7 +177,7 @@ def assistant_loop():
                 speak("Yes boss")
                 with sr.Microphone() as source:
                     status_label.config(text="🎤 Waiting for your command...")
-                    print("Zora is active. Listening for command...")
+                    print("ZORA is active. Listening for command...")
                     audio = recognizer.listen(source)
                     command = recognizer.recognize_google(audio)
                     processCommand(command)
