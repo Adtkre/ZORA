@@ -19,7 +19,10 @@ Just say **“Zora”** to wake it up – it listens, responds with ChatGPT inte
 - ✍️ Dictates and types your speech in Notepad
 - 📌 Floating always-on-top UI
 - 🎧 Speech recognition + voice output
-
+- Perform real OS-level operations like:
+   🔒 Lock the screen
+   💻 Shutdown or restart the PC
+  
 ---
 
 ## 🛠️ Built With
