@@ -7,21 +7,24 @@ Just say **“Zora”** to wake it up – it listens, responds with ChatGPT inte
 
 ---
 
-## 🚀 Features
+## ✨ Features
+🎧 Always Listening: Wake word detection ("ZORA") with voice command execution
 
-- 🧠 ChatGPT-powered responses via OpenAI API
-- 🗣️ Wake word activation: “Zora”
-- 📂 Opens apps like:
-  - Google Chrome
-  - Spotify
-  - Notepad (with voice typing!)
-  - Calculator, File Explorer, VS Code
-- ✍️ Dictates and types your speech in Notepad
-- 📌 Floating always-on-top UI
-- 🎧 Speech recognition + voice output
-- Perform real OS-level operations like:
-   🔒 Lock the screen
-   💻 Shutdown or restart the PC
+💬 AI-Powered Replies: Integrates with OpenAI GPT-4o to respond intelligently
+
+🔊 Speech Output: Talks back using pyttsx3 TTS
+
+🖱️ GUI Window: Floating draggable widget made with Tkinter
+
+🔋 Battery Monitor: Alerts you if battery is low
+
+🔉 Volume & Brightness Control
+
+🗂️ App Launcher: Opens apps like Chrome, VS Code, Notepad, Calculator, etc.
+
+🛏️ Power Commands: Shutdown, restart, lock, or sleep your PC
+
+✍️ Dictation Mode: Speaks and types what you say into Notepad
   
 ---
 
