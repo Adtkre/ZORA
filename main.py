@@ -7,10 +7,14 @@ import os
 import subprocess
 import pyautogui
 import time
-from openai import OpenAI
+import psutil
+import openai
+import queue
+import platform
 
 recognizer = sr.Recognizer()
 engine = pyttsx3.init()
+speak_queue = queue.Queue()
 
 # Floating window
 root = tk.Tk()
@@ -39,10 +43,19 @@ root.bind("<B1-Motion>", do_move)
 status_label = tk.Label(root, text="🎧 ZORA is running...", fg="white", bg="#ebc8e1", font=("Segoe UI", 11))
 status_label.pack(expand=True)
 
+
+def speak_worker():
+    while True:
+        text = speak_queue.get()
+        status_label.config(text="💬 " + text[:30] + "...")
+        engine.say(text)
+        engine.runAndWait()
+        speak_queue.task_done()
+
 def speak(text):
-    status_label.config(text="💬 " + text[:30] + "...")
-    engine.say(text)
-    engine.runAndWait()
+    speak_queue.put(text)
+
+threading.Thread(target=speak_worker, daemon=True).start()
 
 def listen():
     with sr.Microphone() as source:
@@ -60,17 +73,45 @@ def listen():
         return ""
 
 def aiProcess(command):
-    client = OpenAI(
-        api_key="your-openai-api-key"
-    )
-
-    completion = client.chat.completions.create(
+    openai.api_key = "your own api key"
+    response = openai.ChatCompletion.create(
         model="gpt-4o-mini",
-        store=True,
-        messages=[{"role": "user", "content": command}]
+        messages=[
+            {"role": "user", "content": command}
+        ]
     )
+    return response.choices[0].message['content']
 
-    return completion.choices[0].message.content
+def check_battery():
+    battery = psutil.sensors_battery()
+    percent = battery.percent
+    plugged = battery.power_plugged
+
+    if not plugged and percent <= 30:
+        if percent < 10:
+            speak(f"Critical alert! Battery at {percent}%. Connect your charger now or I might shut down.")
+        else:
+            speak(f"Battery is at {percent}%. Please plug in the charger.")
+
+def battery_monitor():
+    while True:
+        check_battery()
+        time.sleep(300)  
+
+def open_settings():
+    system = platform.system()
+    try:
+        if system == "Windows":
+            subprocess.run(["start", "ms-settings:"], shell=True)
+        elif system == "Darwin":
+            subprocess.run(["open", "/System/Applications/System Preferences.app"])
+        elif system == "Linux":
+            subprocess.run(["gnome-control-center"])
+        else:
+            speak("Sorry, your OS is not supported.")
+    except Exception as e:
+        print(f"Error opening settings: {e}")
+# All commands
 
 def processCommand(c):
     c = c.lower()
@@ -87,17 +128,17 @@ def processCommand(c):
         speak("Opening Netflix")
         webbrowser.open("https://netflix.com")
 
-    # OS Commands
     elif "shutdown" in c:
         speak("Shutting down your computer.")
         os.system("shutdown /s /t 1")
+
     elif "sleep" in c:
-     speak("Putting your computer to sleep.")
-     os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
+        speak("Putting your computer to sleep.")
+        os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
+
     elif "lock screen" in c:
         speak("Locking your computer.")
         os.system("rundll32.exe user32.dll,LockWorkStation")
-
 
     elif "restart" in c:
         speak("Restarting your computer.")
@@ -107,7 +148,6 @@ def processCommand(c):
         speak("Opening Notepad")
         subprocess.Popen("notepad.exe")
         time.sleep(2)
-
         speak("Start speaking. I will type in Notepad. Say 'stop typing' to finish.")
         while True:
             try:
@@ -134,7 +174,6 @@ def processCommand(c):
         speak("Opening File Explorer")
         subprocess.Popen("explorer.exe")
 
-
     elif "open code editor" in c:
         vscode_path = "C:\\Users\\DELL\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Visual Studio Code\\Visual Studio Code.lnk"
         if os.path.exists(vscode_path):
@@ -151,6 +190,10 @@ def processCommand(c):
         else:
             speak("Chrome not found.")
 
+    elif "open settings" in c:
+        speak("Opening Settings")
+        open_settings()
+
     elif any(exit_word in c for exit_word in ["stop", "exit", "bye"]):
         speak("Okay. Goodbye!")
         exit(0)
@@ -159,7 +202,6 @@ def processCommand(c):
         speak("Processing with AI.")
         output = aiProcess(c)
         speak(output)
-
 
 def assistant_loop():
     speak("Starting ZORA...")
@@ -187,4 +229,5 @@ def assistant_loop():
 
 if __name__ == "__main__":
     threading.Thread(target=assistant_loop, daemon=True).start()
+    threading.Thread(target=battery_monitor, daemon=True).start()
     root.mainloop()
