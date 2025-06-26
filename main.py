@@ -8,9 +8,13 @@ import subprocess
 import pyautogui
 import time
 import psutil
-import openai
+from openai import OpenAI
 import queue
 import platform
+import screen_brightness_control as sbc
+from ctypes import cast, POINTER
+from comtypes import CLSCTX_ALL
+from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 
 recognizer = sr.Recognizer()
 engine = pyttsx3.init()
@@ -72,16 +76,18 @@ def listen():
         speak("Sorry, there was a speech service issue.")
         return ""
 
-def aiProcess(command):
-    openai.api_key = "your own api key"
-    response = openai.ChatCompletion.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "user", "content": command}
-        ]
-    )
-    return response.choices[0].message['content']
+client = OpenAI("your-api-key") 
 
+def aiProcess(command):
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o",  
+            messages=[{"role": "user", "content": command}]
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        print("AI error:", e)
+        return "Sorry, I couldn't get a response from the AI."
 def check_battery():
     battery = psutil.sensors_battery()
     percent = battery.percent
@@ -111,8 +117,47 @@ def open_settings():
             speak("Sorry, your OS is not supported.")
     except Exception as e:
         print(f"Error opening settings: {e}")
-# All commands
 
+
+def change_volume(step):
+    try:
+        devices = AudioUtilities.GetSpeakers()
+        interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+        volume = cast(interface, POINTER(IAudioEndpointVolume))
+        current = volume.GetMasterVolumeLevelScalar()
+        new_volume = min(max(0.0, current + step), 1.0)
+        volume.SetMasterVolumeLevelScalar(new_volume, None)
+    except Exception as e:
+        speak("Failed to change volume.")
+        print("Volume error:", e)
+
+def increase_volume():
+    change_volume(0.1)
+    speak("Volume increased")
+
+def decrease_volume():
+    change_volume(-0.1)
+    speak("Volume decreased")
+
+def increase_brightness():
+    try:
+        current = sbc.get_brightness(display=0)[0]
+        sbc.set_brightness(min(100, current + 10))
+        speak("Brightness increased")
+    except Exception as e:
+        speak("Failed to increase brightness")
+        print("Brightness error:", e)
+
+def decrease_brightness():
+    try:
+        current = sbc.get_brightness(display=0)[0]
+        sbc.set_brightness(max(0, current - 10))
+        speak("Brightness decreased")
+    except Exception as e:
+        speak("Failed to decrease brightness")
+        print("Brightness error:", e)
+
+# Command
 def processCommand(c):
     c = c.lower()
 
@@ -148,7 +193,7 @@ def processCommand(c):
         speak("Opening Notepad")
         subprocess.Popen("notepad.exe")
         time.sleep(2)
-        speak("Start speaking. I will type in Notepad. Say 'stop typing' to finish.")
+        speak("Start speaking. Say 'stop typing' to finish.")
         while True:
             try:
                 with sr.Microphone() as source:
@@ -193,6 +238,18 @@ def processCommand(c):
     elif "open settings" in c:
         speak("Opening Settings")
         open_settings()
+
+    elif "increase volume" in c:
+        increase_volume()
+
+    elif "decrease volume" in c:
+        decrease_volume() 
+
+    elif "increase brightness" in c:
+        increase_brightness()
+
+    elif "decrease brightness" in c:
+        decrease_brightness()
 
     elif any(exit_word in c for exit_word in ["stop", "exit", "bye"]):
         speak("Okay. Goodbye!")
