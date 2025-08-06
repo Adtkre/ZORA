@@ -220,7 +220,7 @@ def processCommand(c):
         subprocess.Popen("explorer.exe")
 
     elif "open code editor" in c:
-        vscode_path = "C:\\Users\\DELL\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Visual Studio Code\\Visual Studio Code.lnk"
+        vscode_path = "add your path"
         if os.path.exists(vscode_path):
             speak("Opening VS Code")
             os.startfile(vscode_path)
@@ -228,7 +228,7 @@ def processCommand(c):
             speak("VS Code not found.")
 
     elif "open chrome" in c:
-        chrome_path = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+        chrome_path = "add your path"
         if os.path.exists(chrome_path):
             speak("Opening Google Chrome")
             subprocess.Popen(chrome_path)
@@ -288,3 +288,4 @@ if __name__ == "__main__":
     threading.Thread(target=assistant_loop, daemon=True).start()
     threading.Thread(target=battery_monitor, daemon=True).start()
     root.mainloop()
+
